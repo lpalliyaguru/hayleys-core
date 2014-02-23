@@ -195,5 +195,9 @@ class User extends Object{
 	public function getProjects($season) {
 		return Project::getProjectsByUser($this, $season);
 	}
+	
+	public function getArea() {
+		return $this->_data['areaId'];
+	}
 }
 ?>
