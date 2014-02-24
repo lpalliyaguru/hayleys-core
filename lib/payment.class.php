@@ -89,7 +89,6 @@ class Payment {
 	}
 	
 	public function setStinData($data) {
-		Log::put(json_encode($data));
 		$this->st_inData = $data;
 		return $this;
 	}
@@ -241,11 +240,12 @@ class Payment {
 	}
 	
 	private function saveStinData($id) {
-		Log::put(json_encode($this->st_inData));
 		foreach ($this->st_inData->qty as $center => $value) {
-			$out = isset($this->st_inData->qty_out->$center) ? $this->st_inData->qty_out->$center : 0;
-			$insert = array($id,$center,$value,$out);
-			if($this->_db->insert('sp_stin_set', $insert,'`paymentid`,`center`,`in`,`out`')) {
+			$out = property_exists($this->st_inData->qty_out, $center) ? $this->st_inData->qty_out->$center : 0;
+			$grn = property_exists($this->st_inData->qty_grn, $center) ? $this->st_inData->qty_grn->$center : 0;
+			$insert = array($id,$center,$value,$out,$grn);
+			
+			if($this->_db->insert('sp_stin_set', $insert,'`paymentid`,`center`,`in`,`out`,`grn`')) {
 			}
 			else {
 				throw new Exception('Cannot update stin data.',1002);
