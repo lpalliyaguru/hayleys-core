@@ -72,6 +72,17 @@ class StockLarge extends StockAbstract {
 		
 	}
 	
+	/**
+	* Returns actual quantity
+	*/
+	public function getAQ() {
+		$aq = 0;
+		foreach ($this->data['grade-stock'] as $gradeStock) {
+			$dq += $gradeStock['trueWeight'];
+		}
+		return $aq;
+	}
+
 	public function getDQ() {
 		$dq = 0;
 		foreach ($this->data['grade-stock'] as $gradeStock) {
@@ -93,6 +104,17 @@ class StockLarge extends StockAbstract {
 		return $this->getDQ() - $this->getPQ();
 	}
 	
+	public function getMainGradeAQ() {
+		$aq = 0;
+		foreach ($this->data['grade-stock'] as $gradeStock) {
+			if($gradeStock['gradeId'] == $this->project->getGradeCategory()->getMainGrade()->getGradeId()) {
+				$aq += $gradeStock['trueWeight'];
+			}
+		}
+		return $aq;
+	}
+	
+
 	public function getMainGradeDQ() {
 		$dq = 0;
 		foreach ($this->data['grade-stock'] as $gradeStock) {
@@ -115,6 +137,15 @@ class StockLarge extends StockAbstract {
 	
 	public function  getMainGradeRQ() {
 		return $this->getMainGradeDQ() - $this->getMainGradePQ();
+	}
+	
+	public function getAqByGrade($grade) {
+		/* Going through for loop. For better performence this should be avoided */
+		foreach ($this->data['grade-stock'] as $gradeStock) {
+			if($gradeStock['gradeId'] == $grade->getGradeId()) {
+				return $gradeStock['trueWeight'];
+			}
+		}
 	}
 	
 	public function getDqByGrade($grade) {

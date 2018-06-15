@@ -71,7 +71,11 @@ class StockSmall extends StockAbstract {
 		return $stocks;
 	
 	}
-	
+
+	public function getAQ() {
+		return $this->data['crop']['total_AQ'];
+	}
+
 	public function getDQ() {
 		return $this->data['crop']['total_DQ'];
 	}
@@ -108,6 +112,16 @@ class StockSmall extends StockAbstract {
 		);
 	}
 	
+	public function getMainGradeAQ() {
+		$pq = 0; $mapper = $this->getMapperV2(); 
+		foreach ($this->data['belongs'] as $gradeBelong) {
+			if($gradeBelong['gradeName'] == $mapper[$this->project->getGradeCategory()->getMainGrade()->getGradeId()]) {
+				return $gradeBelong['AQ'];
+			}
+		}
+	
+	}
+	
 	public function getMainGradeDQ() {
 		$pq = 0; $mapper = $this->getMapperV2(); 
 		foreach ($this->data['belongs'] as $gradeBelong) {
@@ -130,6 +144,21 @@ class StockSmall extends StockAbstract {
 	public function getMainGradeRQ() {
 		return ($this->getMainGradeDQ() - $this->getMainGradePQ());
 	}
+
+	/**
+	 * 
+	 * @param Grade $grade
+	 * @return unknown
+	 */
+	public function getAqByGrade($grade) {
+		$mapper = $this->getMapperV2(); 
+		foreach ($this->data['belongs'] as $gradeBelong) {
+			if($gradeBelong['gradeName'] == $mapper[$grade->getGradeId()]) {
+				return $gradeBelong['AQ'];
+			}
+		}
+	}
+	
 	/**
 	 * 
 	 * @param Grade $grade

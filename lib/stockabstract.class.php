@@ -3,6 +3,7 @@ abstract class StockAbstract {
 	const TYPE_DQ = 'dq';
 	const TYPE_PQ = 'pq';
 	const TYPE_RQ = 'rq';
+	const TYPE_AQ = 'aq';
 	
 	/**
 	 * 
