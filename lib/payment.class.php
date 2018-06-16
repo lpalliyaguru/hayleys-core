@@ -94,7 +94,7 @@ class Payment {
 	}
 	
 	public function setMainGradeCumulativeQuntity($type, $qty) {
-		if(!in_array($type, array(StockAbstract::TYPE_DQ,StockAbstract::TYPE_PQ,StockAbstract::TYPE_RQ))) { throw new Exception('Not a supported type.'); }
+		if(!in_array($type, array(StockAbstract::TYPE_AQ, StockAbstract::TYPE_DQ, StockAbstract::TYPE_PQ, StockAbstract::TYPE_RQ))) { throw new Exception('Not a supported type.'); }
 		
 		if($type == StockAbstract::TYPE_DQ) {
 			$this->_data['g1_cum_qty_dq'] = $qty;
@@ -105,6 +105,9 @@ class Payment {
 		else if($type == StockAbstract::TYPE_RQ) {
 			$this->_data['g1_cum_qty_rq'] = $qty;
 		}
+		else if($type == StockAbstract::TYPE_AQ) {
+			$this->_data['g1_cum_qty_aq'] = $qty;
+		}
 		return $this;
 	}
 	
@@ -114,6 +117,9 @@ class Payment {
 		}
 		else if($type == StockAbstract::TYPE_PQ) {
 			return $this->_data['g1_cum_qty_pq'];
+		}
+		else if($type == StockAbstract::TYPE_AQ) {
+			return $this->_data['g1_cum_qty_aq'];
 		}
 		else if($type == StockAbstract::TYPE_RQ) {
 			return $this->_data['g1_cum_qty_rq'];
@@ -128,6 +134,9 @@ class Payment {
 		else if($type == StockAbstract::TYPE_PQ) {
 			$this->_data['cum_total_pq'] = $qty;
 		}
+		else if($type == StockAbstract::TYPE_AQ) {
+			$this->_data['cum_total_aq'] = $qty;
+		}
 		else if($type == StockAbstract::TYPE_RQ) {
 			$this->_data['cum_total_rq'] = $qty;
 		}
@@ -141,6 +150,9 @@ class Payment {
 		else if($type == StockAbstract::TYPE_PQ) {
 			return $this->_data['cum_total_pq'];
 		}
+		else if($type == StockAbstract::TYPE_AQ) {
+			return $this->_data['cum_total_aq'];
+		}
 		else if($type == StockAbstract::TYPE_RQ) {
 			return $this->_data['cum_total_rq'];
 		}
@@ -153,6 +165,9 @@ class Payment {
 		}
 		else if($type == StockAbstract::TYPE_PQ) {
 			$this->_data['week_total_pq'] = $qty;
+		}
+		else if($type == StockAbstract::TYPE_AQ) {
+			$this->_data['week_total_aq'] = $qty;
 		}
 		else if($type == StockAbstract::TYPE_RQ) {
 			$this->_data['week_total_rq'] = $qty;
@@ -202,13 +217,13 @@ class Payment {
 				$this->_data['season'],
 				$this->_data['week_start'],
 				$this->_data['week_end'],
-				$this->_data['g1_cum_qty_dq'],
+				$this->_data['g1_cum_qty_aq'],
 				$this->_data['g1_cum_qty_pq'],
 				$this->_data['g1_cum_qty_rq'],
-				$this->_data['week_total_dq'],
+				$this->_data['week_total_aq'],
 				$this->_data['week_total_pq'],
 				$this->_data['week_total_rq'],
-				$this->_data['cum_total_dq'],
+				$this->_data['cum_total_aq'],
 				$this->_data['cum_total_pq'],
 				$this->_data['cum_total_rq'],
 				$this->_data['cum_payment'],
@@ -217,11 +232,11 @@ class Payment {
 				$this->_data['rejection'],
 				$this->_data['done_by']
 				);
-		$fields = '`payment_no`,`project`,`season`,`week_start`,`week_end`,`g1_cum_qty_dq`,`g1_cum_qty_pq`,`g1_cum_qty_rq`,`week_total_dq`,`week_total_pq`,`week_total_rq`,`cum_total_dq`,`cum_total_pq`,`cum_total_rq`,`cum_payment`,`net_payment`,`tson`,`rejection`,`done_by`';
+		$fields = '`payment_no`,`project`,`season`,`week_start`,`week_end`,`g1_cum_qty_aq`,`g1_cum_qty_pq`,`g1_cum_qty_rq`,`week_total_aq`,`week_total_pq`,`week_total_rq`,`cum_total_aq`,`cum_total_pq`,`cum_total_rq`,`cum_payment`,`net_payment`,`tson`,`rejection`,`done_by`';
 		$this->_db->startTransaction();
 		if($id = $this->_db->insert('sp_payment', $insert, $fields)){
 			try {
-				$this->sendForApproval($id);
+				$this->sendForApproval($id, $this->_data['done_by']);
 				$this->saveStinData($id);
 				$this->_db->commitTransaction();
 			}
@@ -243,6 +258,13 @@ class Payment {
 		foreach ($this->st_inData->qty as $center => $value) {
 			$out = property_exists($this->st_inData->qty_out, $center) ? $this->st_inData->qty_out->$center : 0;
 			$grn = property_exists($this->st_inData->qty_grn, $center) ? $this->st_inData->qty_grn->$center : 0;
+
+			$out = $out != '' ? $out : 0;
+			$grn = $grn != '' ? $grn : 0;
+			$value = $value != '' ? $value : 0;
+			
+			error_log('out :' . json_encode(array($out, $grn)));
+
 			$insert = array($id,$center,$value,$out,$grn);
 			
 			if($this->_db->insert('sp_stin_set', $insert,'`paymentid`,`center`,`in`,`out`,`grn`')) {
@@ -289,11 +311,11 @@ class Payment {
 	
 	}
 	
-	public function sendForApproval($id) {
-		$insert = array($id,0);	
-		$rows = '`id`,`approved`';
+	public function sendForApproval($id, $by) {
+		$insert = array($id, 0, $by);	
+		$rows = '`id`,`approved`,`by`';
 		
-		if($this->_db->insert('sp_payment_approvals', $insert,$rows)){
+		if($this->_db->insert('sp_payment_approvals', $insert, $rows)){
 			return true;
 		}
 		else {
