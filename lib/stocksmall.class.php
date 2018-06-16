@@ -142,7 +142,7 @@ class StockSmall extends StockAbstract {
 	}
 	
 	public function getMainGradeRQ() {
-		return ($this->getMainGradeDQ() - $this->getMainGradePQ());
+		return ($this->getMainGradeAQ() - $this->getMainGradePQ());
 	}
 
 	/**
@@ -183,7 +183,7 @@ class StockSmall extends StockAbstract {
 	}
 	
 	public function getRqByGrade($grade) {
-		return ($this->getDqByGrade($grade) - $this->getPqByGrade($grade));
+		return ($this->getAqByGrade($grade) - $this->getPqByGrade($grade));
 	}
 	
 	public function getTmQty() {

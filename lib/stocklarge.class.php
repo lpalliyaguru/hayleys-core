@@ -78,7 +78,7 @@ class StockLarge extends StockAbstract {
 	public function getAQ() {
 		$aq = 0;
 		foreach ($this->data['grade-stock'] as $gradeStock) {
-			$dq += $gradeStock['trueWeight'];
+			$aq += $gradeStock['trueWeight'];
 		}
 		return $aq;
 	}
@@ -101,7 +101,7 @@ class StockLarge extends StockAbstract {
 	
 	public function getRQ() {
 		$rq = 0;
-		return $this->getDQ() - $this->getPQ();
+		return $this->getAQ() - $this->getPQ();
 	}
 	
 	public function getMainGradeAQ() {
@@ -136,7 +136,7 @@ class StockLarge extends StockAbstract {
 	}
 	
 	public function  getMainGradeRQ() {
-		return $this->getMainGradeDQ() - $this->getMainGradePQ();
+		return $this->getMainGradeAQ() - $this->getMainGradePQ();
 	}
 	
 	public function getAqByGrade($grade) {
@@ -168,7 +168,7 @@ class StockLarge extends StockAbstract {
 	
 	public function getRqByGrade($grade) {
 		/* Going through for loop. For better performence this should be avoided */
-		return ($this->getDqByGrade($grade) - $this->getPqByGrade($grade));
+		return ($this->getAqByGrade($grade) - $this->getPqByGrade($grade));
 	}
 	
 	public function getTmQty() {
