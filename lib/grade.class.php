@@ -51,19 +51,22 @@ class Grade {
 		return (bool)$this->data['maingrade'];
 	}
 	
-	public function getRejectionRate($season) {
-		$result = $this->db->select('sp_rejections','*', 'gradeid="'.$this->data['gradeId'].'" AND season="'.$season->getSeasonId().'"')->getResult();
+	public function getRejectionRate($season, $project) {
+		error_log($project->getId());
+		$result = $this->db->select('sp_rejections','*', 'gradeid="'.$this->data['gradeId'].'" AND season="'.$season->getSeasonId().'" AND project=' . $project->getId())->getResult();
 		$rejecion = $result ? array_shift($result) : null;
 		return !is_null($rejecion) ? $rejecion['rate'] : null; 	
 	}
 	
-	public function updateRejection($season, $rate) {
-		$result = $this->db->update('sp_rejections', 'rate='.$rate, 'gradeid="'.$this->data['gradeId'].'" AND season='.$season->getSeasonId());
+	public function updateRejection($season, $project, $rate) {
+		$result = $this->db->update('sp_rejections', 'rate='.$rate, 'gradeid="'.$this->data['gradeId'].'" AND season='.$season->getSeasonId() . ' AND project=' . $project->getId());
 		return $result;
 	}
 	
-	public function setRejection($season, $rate) {
-		$result = $this->db->insert('sp_rejections',array($this->data['gradeId'],$season->getSeasonId(),$rate),'gradeid,season,rate');
+	public function setRejection($season, $project, $rate) {
+		$result = $this->db->insert('sp_rejections', 
+			array($this->data['gradeId'], $season->getSeasonId(), $project->getId(), $rate),
+			'gradeid,season,project,rate');
 		return $result;
 	}
 	
