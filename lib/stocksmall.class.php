@@ -87,7 +87,7 @@ class StockSmall extends StockAbstract {
 	}
 	
 	public function getRQ() {
-		$rq = $this->getDQ() - $this->getPQ();
+		$rq = $this->getAQ() - $this->getPQ();
 		return $rq;
 	}
 	
