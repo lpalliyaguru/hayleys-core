@@ -89,6 +89,26 @@ class Project {
 	public function getCenters() {
 		return Center::getCenters($this);
 	}
+
+	public function getAveragePrice($season) {
+		$result = $this->_db->select('sp_average_prices','*','season='.$season->getSeasonId().' AND project='.$this->data['areaId'])->getResult();
+		$priceRow = $result ? array_shift($result) : null;
+		return !is_null($priceRow) ? array(
+			'value' 		=> $priceRow['value'], 
+			'allowance_st' 	=> $priceRow['allowance_st'],
+			'allowance_wl' 	=> $priceRow['allowance_wl']
+		) : null;
+	}
+
+	public function setAveragePrice($season, $price, $allowance_st, $allowance_wl) {
+		$result = $this->_db->insert('sp_average_prices', array($season->getSeasonId(),$this->data['areaId'], $price,$allowance_st, $allowance_wl),'`season`,`project`,`value`,`allowance_st`, `allowance_wl`');
+		return $result;
+	}
+	
+	public function updateAveragePrice($season, $price, $allowance_st, $allowance_wl) {
+		$result = $this->_db->update('sp_average_prices', '`value`='.$price.',`allowance_st`='.$allowance_st . ',`allowance_wl`='.$allowance_wl, '`season`='.$season->getSeasonId().' AND `project`='.$this->data['areaId']);
+		return $result;
+	}
 	
 }
 ?>
