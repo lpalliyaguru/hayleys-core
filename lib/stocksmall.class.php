@@ -33,8 +33,9 @@ class StockSmall extends StockAbstract {
 			throw new Exception('Stock belong data not found');
 		}
 		
-		$center_qtys =  $db->select('centerQuantitySmall','*','id="'.$project->getId().'" AND vehicleNo="'.$v.'" AND date="'.$d.'"')->getResult();
+		$center_qtys =  $db->select('centerQuantitySmall', '*', 'id="'.$project->getId().'" AND vehicleNo="'.$v.'" AND date="'.$d.'"')->getResult();
 		
+		error_log('Getting data for Center TM : found ' . count($center_qtys) . ' records');
 		if($center_qtys) {
 			foreach ($center_qtys as $qty_row) {
 				unset($qty_row['id']); unset($qty_row['date']); unset($qty_row['vehicleNo']); unset($qty_row['project']);

@@ -37,7 +37,30 @@ class Payment {
 	
 		return $payments;
 	}
+
+	public static function getPaymentsByProjectAndSeason($project, $season, $isFinal = false) {
+		$db = Db::getInstance();
+		$where = sprintf('project=%s AND season=%s', $project->getId(), $season->getSeasonId());
+		
+		if($isFinal) {
+			$where .= ' AND final_payment=1';
+		}
+
+		$result = $db->select(
+			'sp_payment',
+			'*',
+			$where
+		)->getResult();
+		
+		$payments = array();
+		
+		if($result) {
+			foreach ($result as $payment) { $payments[] = new Payment($payment); }
+		}
 	
+		return $payments;
+	}	
+
 	public function getId() {
 		return $this->_data['id'];
 	}
@@ -184,6 +207,15 @@ class Payment {
 		return $this;
 	}
 	
+	public function setFinalPayment($flag) {
+		$this->_data['final_payment'] = $flag;
+		return $this;
+	}
+	
+	public function getFinalPayment() {
+		return $this->_data['final_payment'];
+	}
+
 	public function setNetPayment($payment) {
 		$this->_data['net_payment'] = $payment;
 		return $this;
@@ -228,11 +260,12 @@ class Payment {
 				$this->_data['cum_total_rq'],
 				$this->_data['cum_payment'],
 				$this->_data['net_payment'],
+				$this->_data['final_payment'],
 				time(),
 				$this->_data['rejection'],
 				$this->_data['done_by']
 				);
-		$fields = '`payment_no`,`project`,`season`,`week_start`,`week_end`,`g1_cum_qty_aq`,`g1_cum_qty_pq`,`g1_cum_qty_rq`,`week_total_aq`,`week_total_pq`,`week_total_rq`,`cum_total_aq`,`cum_total_pq`,`cum_total_rq`,`cum_payment`,`net_payment`,`tson`,`rejection`,`done_by`';
+		$fields = '`payment_no`,`project`,`season`,`week_start`,`week_end`,`g1_cum_qty_aq`,`g1_cum_qty_pq`,`g1_cum_qty_rq`,`week_total_aq`,`week_total_pq`,`week_total_rq`,`cum_total_aq`,`cum_total_pq`,`cum_total_rq`,`cum_payment`,`net_payment`,`final_payment`,`tson`,`rejection`,`done_by`';
 		$this->_db->startTransaction();
 		if($id = $this->_db->insert('sp_payment', $insert, $fields)){
 			try {

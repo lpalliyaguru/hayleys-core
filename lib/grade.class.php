@@ -139,12 +139,12 @@ class Grade {
 		}
 	}
 	
-	public function getIncentivableRate($season,$qty) {
+	public function getIncentivableRate($season, $qty) {
 		$incentives = $this->getIncentives($season);
 		if(is_null($incentives)) { return 0; }
 		foreach ($incentives as $incentive) {
 			if($qty > (float)$incentive['from'] && $qty <= (float)$incentive['to']) {
-				return $qty * $incentive['rate'];
+				return $qty * 1000 * $incentive['rate'];
 			}
 		}
 		return 0;

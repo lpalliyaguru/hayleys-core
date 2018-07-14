@@ -41,12 +41,17 @@ class Project {
 	
 	}
 	
-	public static function getProjectsByUser(User $user, $season=null) {
+	public static function getProjectsByUser(User $user, $season=null, $gradeCategory = null) {
 		$db = Db::getInstance();
 		$where = 'userId="'.$user->getUserName().'"';
 		
 		if(!is_null($season)) {
 			$where .= ' AND season="'.$season->getSeasonId().'"';	
+		}
+		
+
+		if(!is_null($gradeCategory)) {
+			$where .= ' AND cate_id="'.$gradeCategory->getId().'"';	
 		}
 		
 		$result = $db->select('qa_area','*', $where)->getResult();
@@ -82,6 +87,12 @@ class Project {
 		return $payment ? new Payment($payment) : null;
 	}
 	
+	public function getFinalPayment($season) {
+		$result = $this->_db->select('sp_payment','*','project='.$this->data['areaId'].' AND season='.$season->getSeasonId() . ' AND final_payment=1','id DESC')->getResult();
+		$payment = !is_null($result) ? array_shift($result) : false; 
+		return $payment ? new Payment($payment) : null;
+	}
+
 	public function getPayments() {
 		return Payment::getPaymentsByProject($this);
 	}
